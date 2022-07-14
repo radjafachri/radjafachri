@@ -1,0 +1,55 @@
+test odoo after installasi :
+python3 /opt/odoo14/odoo/odoo-bin -d odoo14 --db_user=odoo14 --db_password=**********
+
+how to install odoo
+*jangan lupa open port untuk postgres (5432) dan odoo (8069)*
+https://www.rosehosting.com/blog/how-to-install-odoo-15-on-ubuntu-20-04/
+https://linuxize.com/post/how-to-install-odoo-14-on-ubuntu-20-04/
+
+/etc/odoo14.conf
+[options]
+; This is the password that allows database operations:
+admin_passwd = **********
+db_host = 10.***.8.7
+db_port = 5432
+db_user = odoo14
+db_password = **********
+addons_path = /opt/odoo14/odoo/addons,/opt/odoo14/odoo-custom-addons
+logfile = /var/log/odoo/odoo.log
+
+sudo nano /etc/systemd/system/odoo14.service
+[Unit]
+Description=Odoo14
+Requires=postgresql.service
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+SyslogIdentifier=odoo14
+PermissionsStartOnly=true
+User=odoo14
+ExecStart=/opt/odoo14/odoo-venv/bin/python3 /opt/odoo14/odoo/odoo-bin -c>
+StandardOutput=journal+console
+
+[Install]
+WantedBy=multi-user.target
+
+
+vi pg_hba.conf (untuk vm odoo dan vm db)
+# Database administrative login by Unix domain socket
+local   all             postgres                                peer
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# "local" is for Unix domain socket connections only
+local   all             all                                     md5
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            md5
+host    all             all             0.0.0.0/0               md5
+# IPv6 local connections:
+host    all             all             ::1/128                 md5
+# Allow replication connections from localhost, by a user with the
+# replication privilege.
+local   replication     all                                     peer
+host    replication     all             127.0.0.1/32            md5
+host    replication     all             ::1/128                 md5
