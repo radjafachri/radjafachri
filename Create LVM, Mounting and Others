@@ -1,0 +1,74 @@
+#First mounting volume to vm
+
+fdisk -l 
+fdisk /dev/vdb
+-> n add partition
+-> p 
+-> t change type to linux lvm (8e)
+-> p check again
+-> w last, for save/written 
+
+#Next pvcreate
+sudo lvmdiskscan
+sudo pvcreate /dev/sda /dev/sdb
+sudo vgcreate volume_group_name /dev/sda
+sudo lvcreate -l 100%FREE -n test2 LVMVolGroup
+
+#Create File system
+mkfs -t ext4 /dev/volgroup1/data
+
+#create dummy file for backup file OG in dir /home
+mkdir -p /media/home/
+mount /dev/vg-manage2/vol-manage2 /media/home/
+rsync -aXS --exclude='/*/.gvfs' /home/. /media/home/.
+diff -r /home /media/home -x ".gvfs/*"
+umount /dev/vg-manage2/vol-manage2 /media/home/
+mount /dev/volgroup1/data /home
+cat /proc/mounts
+vi /etc/fstab
+df -h
+
+#last step check mpunting succeed or not with test rebbot vm
+
+
+#first step after create vm and install linux "check timezone"
+timedatectl set-timezone Asia/Jakarta
+
+
+
+######################################################################################################################################################################
+
+
+#PASSWORDLESS#
+#generate ssh keygen
+ssh-keygen -t rsa
+
+#Upload ssh key to target
+ssh-copy-id root@192.168.0.11
+
+#Test ssh 
+ssh root@192.168.0.11
+
+######################################################################################################################################################################
+Troubleshooting 2: “dpkg: error: dpkg frontend is locked by another process”
+sudo lsof /var/lib/dpkg/lock-frontend
+sudo kill -9 PID
+sudo rm /var/lib/dpkg/lock-frontend
+sudo dpkg --configure -a
+
+dpkg status database is locked by another process
+lsof /var/lib/dpkg/lock
+kill -9 1861
+sudo rm /var/lib/dpkg/lock
+sudo dpkg --configure -a
+
+There is no such procedure of removing the cPanel.Its better if you reload OS and If you don't want to reload OS then follow the steps:
+
+1) Delete all the directory and contents of /usr/local/cpanel & /scripts
+2) Remove all cPanel startup scripts
+3) Kill all cPanel related processes
+4) Reconfigure remaining modules/applications which like to continue to use such as Apache, BIND etc.
+
+install dbi module
+-yum -y install perl-CPAN
+-perl -MCPAN -e 'install Bundle::DBI'
